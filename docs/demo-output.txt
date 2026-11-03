@@ -1,0 +1,100 @@
+LivingCode lab demo. Local fake LLM, throwaway sample app, nothing leaves this Mac.
+
+== 1. Install the sample app and check everything before turning anything on
+$ livingcode install
+  Installed. Live release: r0001
+$ livingcode doctor
+  OK   config is valid: <lab>/etc/sample.toml
+  OK   target is the throwaway sample
+  OK   sandbox is available
+  NOTE using the local fake LLM, so no key is needed and nothing is paid for
+  WARN separate guard and agent users aren't in place on this machine, see README
+  OK   the app is running
+  OK   health URL answers: 200
+  OK   smoke checks pass
+  OK   practice rollback worked
+  Doctor passed.
+$ livingcode on
+  The feature flag is on.
+$ livingcode status
+  Feature flag:   on
+  Live release:   r0001
+  App running:    yes
+  Breaker:        closed
+  Rollbacks in a row: 0
+  Waiting proposals:  0
+  LLM spent this month: $0.0000 of $20.00
+
+== 2. A visitor hits a bug in the sample shop
+  visitor GET /share?total=10&people=0 -> 500
+
+== 3. The agent reads the error and writes a fix and a test (bug fixing is on propose)
+$ livingcode run
+  proposed: Handle zero people in share.
+  Candidate: c00001-e90107cbf0
+$ livingcode proposals
+  c00001-e90107cbf0  bug_fixing  Handle zero people in share.
+$ livingcode show c00001-e90107cbf0
+  Candidate:  c00001-e90107cbf0
+  Capability: bug_fixing
+  Built on:   r0001
+  Why:        Handle zero people in share.
+  
+  --- a/pricing.py
+  +++ b/pricing.py
+  @@ -3,4 +3,6 @@
+   
+   def share(total, people):
+       # Planted bug for the lab: people=0 crashes with ZeroDivisionError.
+  +    if people <= 0:
+  +        return tinyfmt.money(0)
+       return tinyfmt.money(total / people)
+  --- a/tests/test_zero_people.py
+  +++ b/tests/test_zero_people.py
+  @@ -0,0 +1,7 @@
+  +import unittest
+  +import pricing
+  +
+  +
+  +class ZeroPeople(unittest.TestCase):
+  +    def test_zero(self):
+  +        self.assertEqual(pricing.share(10, 0), '$0.00')
+
+== 4. A person approves it, and only the guard deploys it
+$ livingcode approve c00001-e90107cbf0
+  Settled: r0003
+  visitor GET /share?total=10&people=0 -> 200
+
+== 5. A person deploys a version that breaks the checkout page. Its tests pass, the smoke check doesn't
+$ livingcode deploy <lab>/people-change
+  RolledBack: smoke check http://127.0.0.1:63537/checkout gave 500
+  (exit 1)
+  visitor GET /checkout -> 200
+
+== 6. Roll back to the release before the fix, with the network blocked by macOS
+$ sandbox-exec (no network) livingcode rollback
+  RolledBack: now on r0001
+  visitor GET /share?total=10&people=0 -> 500
+
+== 7. What happened, and what it cost
+$ livingcode history
+    r0004  failed    human    2026-11-02 21:58:34
+    r0003  settled   agent    2026-11-02 21:58:33
+    r0002  practice  practice 2026-11-02 21:58:31
+  * r0001  settled   human    2026-11-02 21:58:30
+  
+    #4  RolledBack  human    -  failed: manual
+    #3  RolledBack  human    -  failed: startup
+    #2  Settled     agent    bug_fixing
+    #1  RolledBack  practice -  failed: practice
+$ livingcode cost
+  Today:      $0.0077
+  This month: $0.0077 of $20.00
+  (the fake LLM costs nothing. It reports rough token counts so the budget code still gets used)
+  2 LLM calls are written down in sent-to-llm.jsonl, after redaction
+$ livingcode off
+  The feature flag is off. No new rounds start and candidates are refused.
+
+Done in 6 seconds.
+$ livingcode lab stop
+  The sample app is stopped.

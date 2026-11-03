@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Guard service",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "livingcode",
+      "args": ["guard-service"],
+      "env": { "PYTHONPATH": "${workspaceFolder}/src" }
+    },
+    {
+      "name": "Agent service",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "livingcode",
+      "args": ["agent-service"],
+      "env": { "PYTHONPATH": "${workspaceFolder}/src" }
+    },
+    {
+      "name": "All tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "unittest",
+      "args": ["discover", "-s", "tests", "-t", "."],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
