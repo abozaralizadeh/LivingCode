@@ -1,5 +1,11 @@
 # LivingCode
 
+![A replay of a real run of the LivingCode demo: a bug, a fix written by the agent, an approval, a broken version rolled back on its own, and a rollback with the network blocked](docs/media/demo.gif)
+
+*A replay of a real run of `scripts/demo.py`, slowed down to read. The agent runs on a scripted fake LLM, so no real AI is called.*
+
+**Site:** https://abozaralizadeh.github.io/LivingCode/
+
 LivingCode lets a project improve itself while it runs on its server. You install it, turn it on with a feature flag, and give it your own LLM API key. A config file says what it may do, such as fixing bugs it finds in the logs.
 
 The AI part never deploys anything itself. It hands its change to a separate guard, and the guard has no AI in it at all. The guard checks the change, makes a backup, deploys it, watches it, and rolls it back on its own if something goes wrong. A rollback needs no network, no LLM and no key.
@@ -53,7 +59,7 @@ To see the whole thing work once, on a fresh temp lab, in a few seconds:
 python3 scripts/demo.py
 ```
 
-It shows a visitor hitting a bug, the agent writing a fix and a test, a person approving it, a broken version rolled back on its own, and a rollback with the network blocked. Output from a real run is in [docs/demo-output.txt](docs/demo-output.txt).
+It shows a visitor hitting a bug, the agent writing a fix and a test, a person approving it, a broken version rolled back on its own, and a rollback with the network blocked. Output from a real run is in [docs/demo-output.txt](docs/demo-output.txt). To refresh the replay on the site and the GIF above, run `python3 scripts/record_demo.py` and then `node scripts/make_demo_gif.mjs`, which needs Playwright with Chromium and ffmpeg.
 
 Logs go to `lab/var/log`, and each file there is size limited.
 
@@ -76,10 +82,12 @@ The full run takes a few minutes, because many tests start and stop the sample a
 
 ## Contributing
 
-Issues and ideas are welcome. Changes are welcome too, with one rule: nothing may weaken the safety net. The guard keeps no LLM client, no LLM key and no code path that waits on the agent. The agent can only hand over a candidate, and only the guard deploys. The feature flag stays off by default. A rollback never needs the network, the LLM or a working app.
-
-Please add a test for anything you change, and run the whole suite before you send it.
+Issues and ideas are welcome, and so are changes. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first. It has the one rule that matters most here: nothing may weaken the safety net. It also says how contributions are licensed.
 
 ## License
 
-To be decided.
+Source available, free for non-commercial use ([PolyForm Noncommercial 1.0.0](LICENSE)). You can use it, study it and change it for anything that isn't commercial. The docs and the demo media are under [CC BY-NC 4.0](LICENSE-DOCS.md).
+
+Commercial use needs written permission. Ask for it by [opening an issue](https://github.com/abozaralizadeh/LivingCode/issues).
+
+Copyright (c) 2026 Abozar Alizadeh.

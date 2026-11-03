@@ -8,6 +8,7 @@ version = "0.4.0"
 description = "A library that lets a throwaway sample project improve itself, with a hardcoded safety net that contains no AI."
 readme = "README.md"
 requires-python = ">=3.11"
+license = { file = "LICENSE" }
 dependencies = []
 
 [project.scripts]

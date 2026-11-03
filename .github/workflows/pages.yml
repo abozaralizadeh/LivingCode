@@ -1,10 +1,10 @@
-# Publishes site/ to GitHub Pages.
-# It only runs when started by hand from the Actions tab. Before the first run, set
-# Settings > Pages > Source to "GitHub Actions". To publish on every push to main,
-# add a push trigger below.
+# Publishes site/ to GitHub Pages, whenever site/ changes on main or when started by hand.
 name: Pages
 
 on:
+  push:
+    branches: [main]
+    paths: ["site/**"]
   workflow_dispatch:
 
 permissions:

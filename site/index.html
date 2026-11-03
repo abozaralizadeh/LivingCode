@@ -17,11 +17,13 @@
     --warn: #8a5a00;
     --warn-soft: #fbf0d9;
     --term-bg: #16191d;
+    --term-bar: #23272c;
     --term-text: #d7dce1;
     --term-dim: #8b939c;
     --term-ok: #7fd1a7;
-    --term-bad: #f08c8c;
+    --term-bad: #f2b26b;
     --term-cmd: #9cc4ff;
+    --term-step: #ffffff;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -35,6 +37,7 @@
       --warn: #f2c66d;
       --warn-soft: #33290f;
       --term-bg: #0b0d0f;
+      --term-bar: #1a1d21;
     }
   }
   :root[data-theme="dark"] {
@@ -48,6 +51,7 @@
     --warn: #f2c66d;
     --warn-soft: #33290f;
     --term-bg: #0b0d0f;
+    --term-bar: #1a1d21;
   }
   * { box-sizing: border-box; }
   body {
@@ -56,18 +60,57 @@
     color: var(--text);
     font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
-  main { max-width: 860px; margin: 0 auto; padding: 48px 16px 64px; }
-  h1 { font-size: 2.4rem; line-height: 1.15; margin: 0 0 12px; letter-spacing: -0.02em; }
+  header.top {
+    max-width: 920px; margin: 0 auto; padding: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  header.top .name { font-weight: 700; letter-spacing: -0.01em; }
+  header.top a.repo {
+    color: var(--text); text-decoration: none; font-size: 0.92rem; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; background: var(--card);
+  }
+  header.top a.repo:hover { border-color: var(--accent); }
+  main { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 2.5rem; line-height: 1.12; margin: 0 0 14px; letter-spacing: -0.02em; max-width: 720px; }
   h2 { font-size: 1.45rem; margin: 56px 0 12px; letter-spacing: -0.01em; }
   h3 { font-size: 1.05rem; margin: 0 0 6px; }
   p { margin: 0 0 14px; }
   a { color: var(--accent); }
   code { font: 0.92em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-  .lead { font-size: 1.2rem; color: var(--muted); max-width: 640px; }
+  .lead { font-size: 1.2rem; color: var(--muted); max-width: 680px; }
   .notice {
-    display: inline-block; margin: 0 0 20px; padding: 4px 12px; border-radius: 999px;
-    background: var(--warn-soft); color: var(--warn); font-size: 0.9rem; font-weight: 600;
+    display: inline-block; margin: 0 0 18px; padding: 4px 12px; border-radius: 999px;
+    background: var(--warn-soft); color: var(--warn); font-size: 0.88rem; font-weight: 600;
   }
+
+  .term-window { border-radius: 12px; overflow: hidden; background: var(--term-bg); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18); }
+  .term-bar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--term-bar);
+    color: var(--term-dim); font: 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .term-bar .dot { width: 11px; height: 11px; border-radius: 50%; background: #3b4148; }
+  .term-bar .title { margin-left: 6px; }
+  .screen {
+    margin: 0; padding: 14px 18px 18px; height: 520px; overflow: hidden;
+    white-space: pre-wrap; word-break: break-word; color: var(--term-text);
+    font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .screen .step { color: var(--term-step); font-weight: 700; }
+  .screen .cmd { color: var(--term-cmd); }
+  .screen .ok, .screen .add { color: var(--term-ok); }
+  .screen .bad { color: var(--term-bad); }
+  .screen .dim { color: var(--term-dim); }
+  .screen .cursor { background: var(--term-text); }
+  .demo-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-top: 10px; font-size: 0.9rem; color: var(--muted);
+  }
+  button.replay {
+    font: inherit; font-weight: 600; color: var(--text); background: var(--card);
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer;
+  }
+  button.replay:hover { border-color: var(--accent); }
+
   .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
   .card p { margin: 0; color: var(--muted); }
@@ -75,17 +118,6 @@
   .card.guard p { color: var(--text); }
   ol.flow { padding-left: 22px; margin: 16px 0 0; }
   ol.flow li { margin-bottom: 6px; }
-  figure { margin: 24px 0 0; }
-  figcaption { font-size: 0.92rem; color: var(--muted); margin-bottom: 8px; }
-  pre.term {
-    margin: 0; padding: 16px 18px; border-radius: 10px; overflow-x: auto;
-    background: var(--term-bg); color: var(--term-text);
-    font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  }
-  .term .c { color: var(--term-cmd); }
-  .term .ok { color: var(--term-ok); }
-  .term .bad { color: var(--term-bad); }
-  .term .dim { color: var(--term-dim); }
   pre.cmd {
     margin: 8px 0 16px; padding: 12px 16px; border-radius: 8px; overflow-x: auto;
     background: var(--card); border: 1px solid var(--line);
@@ -94,21 +126,40 @@
   table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.95rem; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); font-weight: 600; }
-  ul { padding-left: 22px; }
+  .licence { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+  .licence p:last-child { margin: 0; }
   footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.92rem; }
   @media (max-width: 640px) {
-    h1 { font-size: 1.9rem; }
+    body { font-size: 16px; }
+    h1 { font-size: 1.85rem; }
+    .lead { font-size: 1.08rem; }
     .split { grid-template-columns: 1fr; }
-    pre.term { font-size: 12px; }
+    .screen { height: 440px; padding: 12px; font-size: 11px; }
   }
 </style>
 </head>
 <body>
+<header class="top">
+  <span class="name">LivingCode</span>
+  <a class="repo" href="https://github.com/abozaralizadeh/LivingCode">Code on GitHub</a>
+</header>
 <main>
   <span class="notice">Lab build. Not for real projects yet.</span>
-  <h1>LivingCode</h1>
-  <p class="lead">A project that keeps improving itself while it runs on its server, using your own LLM key. The part that deploys and rolls back has no AI in it.</p>
-  <p>You install it, turn it on with a feature flag, and a config file says what it may do, such as fix bugs it finds in the logs. <a href="https://github.com/abozaralizadeh/LivingCode">See the code on GitHub.</a></p>
+  <h1>A project that improves itself on its server, with a safety net that isn't AI.</h1>
+  <p class="lead">You install LivingCode, turn it on with a feature flag, and give it your own LLM key. A config file says what it may do, such as fix bugs it finds in the logs. The part that deploys and rolls back has no AI in it at all.</p>
+
+  <h2>See it work</h2>
+  <div data-demo>
+    <div class="term-window">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="title">python3 scripts/demo.py</span></div>
+      <pre class="screen" aria-label="Replay of a recorded run of the LivingCode demo"><noscript>Turn on JavaScript to watch the replay, or see docs/demo-output.txt in the repo for the full output.</noscript></pre>
+    </div>
+    <div class="demo-foot">
+      <span>A replay of a real run, slowed down to read. The agent runs on a scripted fake LLM, so no real AI is called.</span>
+      <button class="replay" type="button" data-replay>Play again</button>
+    </div>
+  </div>
+  <p style="margin-top:16px">In the replay: a visitor hits a bug, the agent writes a fix and a test, a person approves it, and the guard deploys it. Then a broken version is rolled back on its own, and a rollback runs with the network blocked by macOS.</p>
 
   <h2>Two parts that don't trust each other</h2>
   <div class="split">
@@ -130,64 +181,16 @@
     <li>It settles, or it rolls back and tells the agent what went wrong.</li>
   </ol>
 
-  <h2>From a real run</h2>
-  <p>It's a command line tool, so there's no screen to show. These are the terminal itself, from <code>scripts/demo.py</code> running on the throwaway sample app with a scripted fake LLM.</p>
-
-  <figure>
-    <figcaption>Before anything is turned on, the doctor checks the setup and does a practice rollback.</figcaption>
-<pre class="term"><span class="c">$ livingcode doctor</span>
-  <span class="ok">OK</span>   config is valid: &lt;lab&gt;/etc/sample.toml
-  <span class="ok">OK</span>   target is the throwaway sample
-  <span class="ok">OK</span>   sandbox is available
-  <span class="dim">NOTE using the local fake LLM, so no key is needed and nothing is paid for</span>
-  <span class="bad">WARN</span> separate guard and agent users aren't in place on this machine, see README
-  <span class="ok">OK</span>   the app is running
-  <span class="ok">OK</span>   health URL answers: 200
-  <span class="ok">OK</span>   smoke checks pass
-  <span class="ok">OK</span>   practice rollback worked
-  Doctor passed.</pre>
-  </figure>
-
-  <figure>
-    <figcaption>A visitor hits a bug. The agent writes a fix and a test, and waits for a person.</figcaption>
-<pre class="term">  visitor GET /share?total=10&amp;people=0 -&gt; <span class="bad">500</span>
-<span class="c">$ livingcode run</span>
-  proposed: Handle zero people in share.
-<span class="c">$ livingcode show c00001-e90107cbf0</span>
-  --- a/pricing.py
-  +++ b/pricing.py
-   def share(total, people):
-<span class="ok">  +    if people &lt;= 0:
-  +        return tinyfmt.money(0)</span>
-       return tinyfmt.money(total / people)
-<span class="c">$ livingcode approve c00001-e90107cbf0</span>
-  <span class="ok">Settled: r0003</span>
-  visitor GET /share?total=10&amp;people=0 -&gt; <span class="ok">200</span></pre>
-  </figure>
-
-  <figure>
-    <figcaption>A broken version passes its tests but fails the smoke check, so the guard rolls it back by itself.</figcaption>
-<pre class="term"><span class="c">$ livingcode deploy &lt;lab&gt;/people-change</span>
-  <span class="bad">RolledBack: smoke check http://127.0.0.1:63537/checkout gave 500</span>
-  visitor GET /checkout -&gt; <span class="ok">200</span></pre>
-  </figure>
-
-  <figure>
-    <figcaption>A rollback with the network blocked by macOS. It still works.</figcaption>
-<pre class="term"><span class="c">$ sandbox-exec (no network) livingcode rollback</span>
-  <span class="ok">RolledBack: now on r0001</span></pre>
-  </figure>
-
   <h2>Quick install</h2>
   <p>You need macOS and Python 3.11 or newer. There are no other dependencies.</p>
 <pre class="cmd">git clone https://github.com/abozaralizadeh/LivingCode.git
 cd LivingCode
 ./setup_service.sh</pre>
-  <p>That installs the sample app, starts it and runs the doctor. Run it again any time to update and restart. Then:</p>
+  <p>That installs the sample app, starts it and runs the doctor, which ends with a practice rollback. Run it again any time to update and restart. Then:</p>
 <pre class="cmd">PYTHONPATH=src python3 -m livingcode status
 python3 scripts/demo.py
 python3 -m unittest discover -s tests -t .</pre>
-  <p>The demo plays the whole story on a fresh temp lab in a few seconds. The tests take a few minutes, because many of them start and stop the sample app for real.</p>
+  <p>The demo plays the whole story on a fresh temp lab. The tests take a few minutes, because many of them start and stop the sample app for real.</p>
 
   <h2>Where it stands</h2>
   <p>Today it only runs on the throwaway sample app that comes with it. A lab lock in the code refuses any other project, any other machine and any real LLM host.</p>
@@ -202,9 +205,17 @@ python3 -m unittest discover -s tests -t .</pre>
   </table>
   <p style="margin-top:16px">Still to do before real use: the guard and agent as separate users on Linux, a first run of the Linux setup, a real LLM and a real project, and privacy and security reviews.</p>
 
+  <h2>Licence</h2>
+  <div class="licence">
+    <p>Source available, free for non-commercial use (<a href="https://polyformproject.org/licenses/noncommercial/1.0.0">PolyForm Noncommercial 1.0.0</a>). You can use it, study it and change it for anything that isn't commercial.</p>
+    <p>Commercial use needs written permission. Ask for it by <a href="https://github.com/abozaralizadeh/LivingCode/issues">opening an issue</a>.</p>
+  </div>
+
   <footer>
-    LivingCode is a working name. License: to be decided. <a href="https://github.com/abozaralizadeh/LivingCode">Code and docs on GitHub.</a>
+    LivingCode is a working name. Copyright (c) 2026 Abozar Alizadeh. <a href="https://github.com/abozaralizadeh/LivingCode">Code and docs on GitHub.</a>
   </footer>
 </main>
+<script src="demo-cast.js"></script>
+<script src="player.js"></script>
 </body>
 </html>

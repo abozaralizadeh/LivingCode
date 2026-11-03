@@ -205,11 +205,11 @@ A rollback restores code only. A data restore is always a manual step.
 
 **Reason:** a dashboard adds a login and one more thing to secure on a live server. A webhook works with Slack, Discord, ntfy and others.
 
-### D21. Open source
+### D21. Source available, free for non-commercial use
 
-**Choice:** publish it as open source. The licence is still to be decided.
+**Choice:** publish the source under PolyForm Noncommercial 1.0.0, with the docs and demo media under CC BY-NC 4.0. Commercial use needs written permission.
 
-**Reason:** people need to read the code before they let it change their live server. Whatever licence is picked needs a clear no-warranty clause, which matters for a tool like this.
+**Reason:** people need to read the code before they let it change their live server. The licence also has a clear no-liability clause, which matters for a tool like this.
 
 ### D22. The app holds a lock file while it runs
 
