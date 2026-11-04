@@ -34,12 +34,13 @@ Shown by tests that run today:
 - redaction, prompt injection and bypass attempts, budgets, rate limits and the circuit breaker
 - the planted bug goes from error to fix to deploy, and a bad fix goes from deploy to rollback to retry
 - updates wait 7 days, vulnerable versions get replaced, behaviour totals hide ids and rare routes, and feature size limits hold
+- the web demo does a whole run for each of its three bugs behind a `/livingcode/` path, and its runner works on Linux with no network
 
 Not done yet:
 
 - the guard and agent running as separate operating system users, on Linux
 - the Linux part of `setup_service.sh`, which has never been run
-- any real LLM, real project or real server
+- any real LLM, real project or real server (the web demo is the first try with a real AI, on the sample app only)
 - the privacy review for behaviour watching, and an outside security review
 
 ## What the first version includes

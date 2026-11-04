@@ -9,6 +9,7 @@ from .anthropic import AnthropicClient
 from .base import LLMClient, LLMError, LLMReply
 from .fake import FakeLLM
 from .openai import OpenAIClient
+from .relay import RelayClient
 
 __all__ = ["LLMClient", "LLMError", "LLMReply", "FakeLLM", "make_client"]
 KEY_NAME = "LIVINGCODE_LLM_API_KEY"
@@ -29,5 +30,7 @@ def make_client(cfg) -> LLMClient:
     lab.check(cfg)
     if cfg.llm.provider == "fake":
         return FakeLLM.from_file(cfg.llm.fake_script)
+    if cfg.llm.provider == "relay":
+        return RelayClient(cfg.llm.socket)
     client = {"anthropic": AnthropicClient, "openai": OpenAIClient}[cfg.llm.provider]
     return client(_load_key(cfg), cfg.llm.model, cfg.llm.base_url)

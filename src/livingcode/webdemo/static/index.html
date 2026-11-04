@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LivingCode live demo: watch it fix a bug</title>
+<meta name="description" content="Pick a bug in a tiny sample shop and watch LivingCode's agent fix it with a real AI, while a guard with no AI in it deploys the fix and watches it.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0D1110">
+<link rel="icon" href="static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+<header class="wrap bar">
+  <a class="brand" href="https://abozaralizadeh.github.io/LivingCode/">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="9"/><path d="M5 17h5.5l2.5-6 4 12 2.6-6H27"/></svg>
+    LivingCode <span class="tag">live demo</span>
+  </a>
+  <a class="btn btn-ghost" href="https://github.com/abozaralizadeh/LivingCode">GitHub</a>
+</header>
+
+<main>
+  <section class="wrap intro">
+    <h1>Watch it fix a <span class="accent">real bug.</span></h1>
+    <p class="lead">Pick a bug. A fresh copy of a tiny sample shop starts up, a visitor hits the bug, and the agent asks an AI for a fix and a test. Then a guard with no AI in it deploys the fix and watches it.</p>
+    <p class="lead small">The AI is real, so sometimes it won't find a fix. That's fine. Nothing gets deployed unless the tests and the health checks pass, and the guard can always put the last good version back.</p>
+    <p class="note" data-llm-note hidden>This server has no AI key set yet, so it runs on the scripted fake AI. Everything else is the real thing.</p>
+  </section>
+
+  <section class="wrap picker" aria-labelledby="pick-title">
+    <h2 class="eyebrow" id="pick-title">Pick a bug</h2>
+    <div class="cards" data-cards></div>
+    <p class="status" data-status role="status" aria-live="polite">Loading...</p>
+  </section>
+
+  <section class="wrap watch" aria-label="The run">
+    <div class="window">
+      <div class="window-bar">
+        <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="window-title" data-title>waiting for a run</span>
+        <span class="timer" data-timer></span>
+      </div>
+      <div class="monitor" data-monitor aria-hidden="true">
+        <svg class="trace" data-trace preserveAspectRatio="none"><g class="flow"><path class="ok"/></g><path class="bad"/></svg>
+      </div>
+      <pre class="screen" data-screen tabindex="0" aria-label="Live output of the run"><span class="dim">Nothing running yet. Pick a bug above, or wait for someone else's run to start.</span></pre>
+    </div>
+    <div class="result" data-result hidden>
+      <strong data-result-title></strong>
+      <p data-result-text></p>
+      <p class="meta" data-result-meta></p>
+    </div>
+  </section>
+
+  <section class="wrap locks" aria-labelledby="locks-title">
+    <h2 id="locks-title">How this demo is locked down</h2>
+    <div class="lock-grid">
+      <div class="lock"><h3>You only pick a bug</h3><p>Nothing you type reaches the AI or gets run. The three bugs are fixed in the code.</p></div>
+      <div class="lock"><h3>The run has no network</h3><p>It happens in a sealed process that can't reach the internet. It asks for AI help through a local relay, and only the relay has the key.</p></div>
+      <div class="lock"><h3>The AI has no shell</h3><p>It can read, search and edit files in its own copy of the shop, and run the tests. That's the whole list.</p></div>
+      <div class="lock"><h3>Thrown away after</h3><p>Each run gets a fresh folder, deleted when it ends. One run at a time, with a time limit and a daily cap.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <span>Made by <a href="https://abozaralizadeh.github.io">Abozar Alizadeh</a>.</span>
+  <span>Source available under PolyForm Noncommercial 1.0.0. <a href="https://github.com/abozaralizadeh/LivingCode">Read the code</a>.</span>
+</footer>
+<script src="static/app.js" defer></script>
+</body>
+</html>

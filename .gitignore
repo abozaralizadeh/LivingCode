@@ -11,3 +11,5 @@ dist/
 *.sqlite3
 .DS_Store
 node_modules/
+# The web demo's state, sockets and logs
+/data/

@@ -96,6 +96,10 @@ What the agent sent to the LLM, after redaction, is in `lab/var/lib/agent/sent-t
 | `safety.backup_command` | empty | Your own command for backing up data before a deploy |
 | `safety.alert_webhook` | empty | Where alerts go. In the lab it has to be on this machine |
 
+## Web demo
+
+The web page where visitors watch a run has its own guide: [WEB-DEMO.md](WEB-DEMO.md).
+
 ## Linux (never run)
 
 On Linux, `setup_service.sh` creates the `lc-guard` and `lc-agent` users, the folders and their owners, two systemd services, and a sudoers rule that only lets the guard restart the app. It refuses to run unless you set `LIVINGCODE_I_KNOW_THIS_IS_UNTESTED=yes`, and the lab lock in the code refuses Linux anyway. Treat it as a draft until it has been tried on a throwaway VM. Once it runs, follow the logs with `journalctl -u livingcode-guard.service -f`.

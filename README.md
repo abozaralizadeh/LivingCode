@@ -14,7 +14,7 @@ The AI part never deploys anything itself. It hands its change to a separate gua
 
 ## Status: a lab, not a product
 
-Don't point this at a real project yet. Today it only runs on the throwaway sample app in this repo, on macOS. A hardcoded lab lock in `src/livingcode/common/lab.py` refuses any other project, any other machine and any real LLM host.
+Don't point this at a real project yet. Today it only runs on the throwaway sample app in this repo, on macOS. A hardcoded lab lock in `src/livingcode/common/lab.py` refuses any other project, any other machine and any real LLM host. The one exception is the web demo's sealed runner, below.
 
 Nothing in the lab makes a paid or outside call. These are local stand-ins:
 
@@ -63,6 +63,16 @@ It shows a visitor hitting a bug, the agent writing a fix and a test, a person a
 
 Logs go to `lab/var/log`, and each file there is size limited.
 
+## Web demo
+
+There's also a small web page where a visitor picks one of three planted bugs and watches the agent fix it, with a real AI when an Azure OpenAI key is set. Each run happens in a sealed systemd unit with no network and no key, it's thrown away after, and there are daily caps on runs and tokens. To try it on a Mac:
+
+```bash
+PYTHONPATH=src python3 -m livingcode.webdemo.front
+```
+
+Then open http://127.0.0.1:8606/. Without a key it runs on the scripted fake AI. How it's locked down and how to host it on a shared Linux VM behind nginx are in [docs/WEB-DEMO.md](docs/WEB-DEMO.md).
+
 ## Run the tests
 
 ```bash
@@ -78,6 +88,7 @@ The full run takes a few minutes, because many tests start and stop the sample a
 | [docs/DESIGN.md](docs/DESIGN.md) | Architecture, the reason for each decision, and how the lab build differs from the design |
 | [docs/LOGICAL-FLOW.md](docs/LOGICAL-FLOW.md) | The main flows, step by step, with diagrams |
 | [docs/OPERATOR.md](docs/OPERATOR.md) | Setting up and running the lab, the commands, and what to do when something goes wrong |
+| [docs/WEB-DEMO.md](docs/WEB-DEMO.md) | The web demo: how it's put together, how it's locked down, and how to host it |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | The phases, where things stand, and the biggest risks |
 
 ## Contributing

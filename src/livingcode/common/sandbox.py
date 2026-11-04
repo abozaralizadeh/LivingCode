@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import runner as default_runner
+from . import lab, runner as default_runner
 
 OUTPUT_LIMIT = 20000
 
@@ -117,10 +117,50 @@ class SystemdSandbox(Sandbox):
             shutil.rmtree(base, ignore_errors=True)
 
 
+class ConfinedSandbox(Sandbox):
+    """Linux, inside the web demo's runner unit. That unit is the real sandbox: no network,
+    a read only system, a private /tmp and no secrets. This adds a temporary copy, a clean
+    environment, limits and a timeout, and it refuses to run anywhere else."""
+
+    def run(self, tree: Path, command: list[str], timeout: float) -> SandboxResult:
+        if not lab.confined():
+            raise SandboxUnavailable("not inside the sealed runner")
+        base = Path(tempfile.mkdtemp(prefix="lc-sandbox-")).resolve()
+        workdir = base / "tree"
+
+        def limits() -> None:
+            import resource
+
+            seconds = int(timeout) + 1
+            resource.setrlimit(resource.RLIMIT_CPU, (seconds, seconds))
+            resource.setrlimit(resource.RLIMIT_FSIZE, (64 * 1024 * 1024,) * 2)
+            resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+
+        try:
+            shutil.copytree(tree, workdir, symlinks=False)
+            (workdir / ".tmp").mkdir(exist_ok=True)
+            process = subprocess.Popen(
+                command, cwd=workdir, env=_env(workdir), text=True, errors="replace",
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True,
+                preexec_fn=limits,
+            )
+            try:
+                output, _ = process.communicate(timeout=timeout)
+                return SandboxResult(process.returncode, output[-OUTPUT_LIMIT:])
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGKILL)
+                output, _ = process.communicate()
+                return SandboxResult(124, (output or "")[-OUTPUT_LIMIT:], timed_out=True)
+        finally:
+            shutil.rmtree(base, ignore_errors=True)
+
+
 def make_sandbox(cfg) -> Sandbox:
     system = platform.system()
     if system == "Darwin":
         return MacSandbox(deny_read=(cfg.state_dir, cfg.log_dir))
+    if system == "Linux" and lab.confined():
+        return ConfinedSandbox()
     if system == "Linux" and shutil.which("systemd-run"):
         return SystemdSandbox()
     raise SandboxUnavailable(f"no sandbox available on {system}")

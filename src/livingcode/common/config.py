@@ -50,6 +50,8 @@ class LLM:
     base_url: str = ""
     key_file: str = ""
     fake_script: str = ""
+    # Only for the relay provider: the unix socket of the web demo's front process.
+    socket: str = ""
     budget_per_round_usd: float = 2.0
     budget_per_month_usd: float = 20.0
     input_usd_per_mtok: float = 4.0
@@ -251,8 +253,10 @@ def _validate(cfg: Config) -> None:
     for capability in CAPABILITIES:
         if cfg.mode(capability) not in MODES:
             raise ConfigError(f"capabilities.{capability} must be one of {', '.join(MODES)}")
-    if cfg.llm.provider not in ("fake", "anthropic", "openai"):
-        raise ConfigError("llm.provider must be fake, anthropic or openai")
+    if cfg.llm.provider not in ("fake", "anthropic", "openai", "relay"):
+        raise ConfigError("llm.provider must be fake, anthropic, openai or relay")
+    if cfg.llm.provider == "relay" and not cfg.llm.socket:
+        raise ConfigError("llm.socket is required with the relay provider")
     if cfg.sync.backend not in ("local", "git"):
         raise ConfigError("sync.backend must be local or git")
     for check in cfg.health.smoke_checks:

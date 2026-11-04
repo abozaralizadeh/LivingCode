@@ -80,7 +80,9 @@ def cmd_doctor(args) -> int:
         line(True, "sandbox is available")
     except SandboxUnavailable as exc:
         line(False, str(exc))
-    if cfg.llm.provider != "fake":
+    if cfg.llm.provider == "relay":
+        line(Path(cfg.llm.socket).exists(), "the LLM relay socket is there, and the key stays outside the agent")
+    elif cfg.llm.provider != "fake":
         from .llm import LLMError, make_client
 
         try:

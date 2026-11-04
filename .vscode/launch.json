@@ -18,6 +18,22 @@
       "env": { "PYTHONPATH": "${workspaceFolder}/src" }
     },
     {
+      "name": "Web demo (front, fake AI)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "livingcode.webdemo.front",
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}/src", "LIVINGCODE_WEB_LLM": "fake" }
+    },
+    {
+      "name": "Web demo (front, Azure from .env)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "livingcode.webdemo.front",
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}/src" }
+    },
+    {
       "name": "All tests",
       "type": "debugpy",
       "request": "launch",

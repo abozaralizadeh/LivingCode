@@ -217,6 +217,16 @@ A rollback restores code only. A data restore is always a manual step.
 
 **Reason:** the first lab build looked for the app in the process list with `ps`. On macOS `ps` is a setuid program, and the no-network sandbox refuses to run those, so a rollback under that sandbox couldn't tell if the app was up and ended in NeedsHuman. A lock needs no outside program and no network, the operating system drops it the moment the app dies, even after `kill -9`, and a reused process id can't fool it.
 
+### D23. A web demo on a shared VM (Proposed)
+
+**Choice:** a small web page lets visitors watch the agent fix one of three planted bugs in the sample shop, with a real AI. It runs as two processes. The front serves the page, holds the AI key and keeps the limits. Each run happens in its own systemd unit with no network, a fresh temp folder, and a read only view of the code without the key. The run reaches the AI only through a relay socket in the front, which answers only while a run is going and stops at the run's call and token caps and at the day's budget. Details are in [WEB-DEMO.md](WEB-DEMO.md).
+
+**Reason:** people should be able to see it work without installing anything. Letting a real AI change code on a shared server is the risky part, so the AI's side gets no network, no key, no shell action and nothing that lasts past the run. Visitors only pick a bug, so nothing they type is ever run.
+
+**The lab lock:** it still refuses Linux in general. It allows one place: a process that says it's the sealed runner (`LIVINGCODE_CONFINED=1`) and whose only routes go through loopback. It also allows the `relay` LLM provider, but only as a local socket path, so from the runner's side the AI is still on this machine.
+
+**Trade-off:** the front and the runner run as the same user, the folder's owner, the way the other demos on that VM do. systemd's namespaces keep them apart instead of two users: the runner can't see `.env`, the front's state or the logs, and can't write to the project. Inside a run, the guard and the agent are one user too, as in the rest of the lab. So this shows the flow, not the two user split from D3. It isn't the operator dashboard that D20 rules out either: the page only shows runs of the sample.
+
 ## Data model
 
 Each side owns its own database. They exchange information through files in two folders, so neither reads the other's database.
@@ -344,7 +354,7 @@ The lab build follows this design, with these differences. Each one is either to
 
 | Design says | Lab build does | Why |
 | --- | --- | --- |
-| Official client libraries for Claude and ChatGPT | Plain HTTP calls with the standard library | Keeps the project free of outside dependencies for now. Tested only against a local fake server |
+| Official client libraries for Claude and ChatGPT | Plain HTTP calls with the standard library, plus an Azure OpenAI adapter for the web demo (D23) | Keeps the project free of outside dependencies for now. Tested only against a local fake server |
 | pytest | `unittest` | Same reason, it's in the standard library |
 | A candidate is a patch | A candidate is a JSON list of whole file changes, each with the hash of the file it replaces | Simpler to check and nothing to apply with an outside tool |
 | A virtual environment per release | A `_deps` folder per release, installed from a hashed lock file and a local package folder | No network, and no wheels to download |
@@ -356,4 +366,4 @@ The lab build follows this design, with these differences. Each one is either to
 | Commands listed above | Also `guard-service`, `agent-service` and `lab stop`, `lab restart`, `lab reset` | To run the two services and look after the sample app |
 | Behaviour totals (D14) | The guard's own health and smoke checks identify themselves and aren't counted | They aren't visits |
 
-On top of all this, a hardcoded lab lock (`src/livingcode/common/lab.py`) only allows the throwaway sample app on this Mac, with the health URL, webhook and LLM all on this machine, and no git push.
+On top of all this, a hardcoded lab lock (`src/livingcode/common/lab.py`) only allows the throwaway sample app on this Mac, with the health URL, webhook and LLM all on this machine, and no git push. The one exception is the web demo's sealed runner on Linux (D23).
