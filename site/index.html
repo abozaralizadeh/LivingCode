@@ -3,219 +3,311 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LivingCode</title>
-<meta name="description" content="A project that improves itself on its server, with a safety net that has no AI in it.">
-<style>
-  :root {
-    --bg: #fbfaf7;
-    --text: #1d1f21;
-    --muted: #5b6066;
-    --line: #e2dfd8;
-    --card: #ffffff;
-    --accent: #1f6f5c;
-    --accent-soft: #e3f1ec;
-    --warn: #8a5a00;
-    --warn-soft: #fbf0d9;
-    --term-bg: #16191d;
-    --term-bar: #23272c;
-    --term-text: #d7dce1;
-    --term-dim: #8b939c;
-    --term-ok: #7fd1a7;
-    --term-bad: #f2b26b;
-    --term-cmd: #9cc4ff;
-    --term-step: #ffffff;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #121416;
-      --text: #e6e8ea;
-      --muted: #a0a7ae;
-      --line: #2a2e33;
-      --card: #191c1f;
-      --accent: #6fcfae;
-      --accent-soft: #17312a;
-      --warn: #f2c66d;
-      --warn-soft: #33290f;
-      --term-bg: #0b0d0f;
-      --term-bar: #1a1d21;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #121416;
-    --text: #e6e8ea;
-    --muted: #a0a7ae;
-    --line: #2a2e33;
-    --card: #191c1f;
-    --accent: #6fcfae;
-    --accent-soft: #17312a;
-    --warn: #f2c66d;
-    --warn-soft: #33290f;
-    --term-bg: #0b0d0f;
-    --term-bar: #1a1d21;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-  header.top {
-    max-width: 920px; margin: 0 auto; padding: 16px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  }
-  header.top .name { font-weight: 700; letter-spacing: -0.01em; }
-  header.top a.repo {
-    color: var(--text); text-decoration: none; font-size: 0.92rem; font-weight: 600;
-    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; background: var(--card);
-  }
-  header.top a.repo:hover { border-color: var(--accent); }
-  main { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
-  h1 { font-size: 2.5rem; line-height: 1.12; margin: 0 0 14px; letter-spacing: -0.02em; max-width: 720px; }
-  h2 { font-size: 1.45rem; margin: 56px 0 12px; letter-spacing: -0.01em; }
-  h3 { font-size: 1.05rem; margin: 0 0 6px; }
-  p { margin: 0 0 14px; }
-  a { color: var(--accent); }
-  code { font: 0.92em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-  .lead { font-size: 1.2rem; color: var(--muted); max-width: 680px; }
-  .notice {
-    display: inline-block; margin: 0 0 18px; padding: 4px 12px; border-radius: 999px;
-    background: var(--warn-soft); color: var(--warn); font-size: 0.88rem; font-weight: 600;
-  }
-
-  .term-window { border-radius: 12px; overflow: hidden; background: var(--term-bg); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18); }
-  .term-bar {
-    display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--term-bar);
-    color: var(--term-dim); font: 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  }
-  .term-bar .dot { width: 11px; height: 11px; border-radius: 50%; background: #3b4148; }
-  .term-bar .title { margin-left: 6px; }
-  .screen {
-    margin: 0; padding: 14px 18px 18px; height: 520px; overflow: hidden;
-    white-space: pre-wrap; word-break: break-word; color: var(--term-text);
-    font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  }
-  .screen .step { color: var(--term-step); font-weight: 700; }
-  .screen .cmd { color: var(--term-cmd); }
-  .screen .ok, .screen .add { color: var(--term-ok); }
-  .screen .bad { color: var(--term-bad); }
-  .screen .dim { color: var(--term-dim); }
-  .screen .cursor { background: var(--term-text); }
-  .demo-foot {
-    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
-    margin-top: 10px; font-size: 0.9rem; color: var(--muted);
-  }
-  button.replay {
-    font: inherit; font-weight: 600; color: var(--text); background: var(--card);
-    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer;
-  }
-  button.replay:hover { border-color: var(--accent); }
-
-  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
-  .card p { margin: 0; color: var(--muted); }
-  .card.guard { border-color: var(--accent); background: var(--accent-soft); }
-  .card.guard p { color: var(--text); }
-  ol.flow { padding-left: 22px; margin: 16px 0 0; }
-  ol.flow li { margin-bottom: 6px; }
-  pre.cmd {
-    margin: 8px 0 16px; padding: 12px 16px; border-radius: 8px; overflow-x: auto;
-    background: var(--card); border: 1px solid var(--line);
-    font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  }
-  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.95rem; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; }
-  .licence { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
-  .licence p:last-child { margin: 0; }
-  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.92rem; }
-  @media (max-width: 640px) {
-    body { font-size: 16px; }
-    h1 { font-size: 1.85rem; }
-    .lead { font-size: 1.08rem; }
-    .split { grid-template-columns: 1fr; }
-    .screen { height: 440px; padding: 12px; font-size: 11px; }
-  }
-</style>
+<title>LivingCode: let your app fix its own bugs</title>
+<meta name="description" content="LivingCode reads the errors in your logs and writes a fix with your own LLM key. A guard with no AI in it deploys the fix and puts the last good version back if anything breaks.">
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1110" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://abozaralizadeh.github.io/LivingCode/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LivingCode">
+<meta property="og:title" content="LivingCode: let your app fix its own bugs">
+<meta property="og:description" content="An agent writes the fix with your own LLM key. A guard with no AI in it deploys it, and rolls it back on its own if anything breaks.">
+<meta property="og:url" content="https://abozaralizadeh.github.io/LivingCode/">
+<meta property="og:image" content="https://abozaralizadeh.github.io/LivingCode/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="LivingCode: let your app fix its own bugs. A green health trace and real terminal output showing a broken release rolled back.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LivingCode: let your app fix its own bugs">
+<meta name="twitter:description" content="An agent writes the fix with your own LLM key. A guard with no AI in it deploys it, and rolls it back on its own if anything breaks.">
+<meta name="twitter:image" content="https://abozaralizadeh.github.io/LivingCode/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>
+  document.documentElement.classList.add("js");
+  try {
+    var saved = localStorage.getItem("lc-theme");
+    if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+  } catch (e) {}
+</script>
 </head>
 <body>
-<header class="top">
-  <span class="name">LivingCode</span>
-  <a class="repo" href="https://github.com/abozaralizadeh/LivingCode">Code on GitHub</a>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" data-header>
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="LivingCode, back to the top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="9" fill="currentColor"/><path d="M5 17h5.5l2.5-6 4 12 2.6-6H27" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      LivingCode
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch between light and dark">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.6A8 8 0 1 1 9.4 4a6.4 6.4 0 0 0 10.6 10.6z"/></svg>
+      </button>
+      <a class="btn btn-ghost btn-small" href="https://github.com/abozaralizadeh/LivingCode" aria-label="LivingCode on GitHub">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span class="label">GitHub</span>
+      </a>
+    </div>
+  </div>
 </header>
-<main>
-  <span class="notice">Lab build. Not for real projects yet.</span>
-  <h1>A project that improves itself on its server, with a safety net that isn't AI.</h1>
-  <p class="lead">You install LivingCode, turn it on with a feature flag, and give it your own LLM key. A config file says what it may do, such as fix bugs it finds in the logs. The part that deploys and rolls back has no AI in it at all.</p>
 
-  <h2>See it work</h2>
-  <div data-demo>
-    <div class="term-window">
-      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="title">python3 scripts/demo.py</span></div>
-      <pre class="screen" aria-label="Replay of a recorded run of the LivingCode demo"><noscript>Turn on JavaScript to watch the replay, or see docs/demo-output.txt in the repo for the full output.</noscript></pre>
+<main id="main">
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="hero-copy reveal">
+        <p class="badge"><span class="pulse-dot" aria-hidden="true"></span>Lab build for macOS. Not for real projects yet.</p>
+        <h1>Let your app fix its own <span class="accent">bugs.</span></h1>
+        <p class="subline">LivingCode reads the errors in your logs and writes a fix with your own LLM key. A guard with no AI in it deploys the fix, watches it, and puts the last good version back if anything breaks.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://github.com/abozaralizadeh/LivingCode">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            View on GitHub
+          </a>
+          <a class="btn btn-ghost" href="#install">Install</a>
+        </div>
+      </div>
+
+      <div class="hero-demo reveal" data-demo>
+        <div class="window">
+          <div class="window-bar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">python3 scripts/demo.py</span></div>
+          <pre class="screen" aria-label="Replay of a recorded run of the LivingCode demo"><noscript>Turn on JavaScript to watch the replay. The full output is in docs/demo-output.txt in the repo.</noscript></pre>
+        </div>
+        <div class="demo-foot">
+          <span>A replay of a real run, slowed down to read. The agent here runs on a scripted fake LLM.</span>
+          <button class="link-btn" type="button" data-replay>Play again</button>
+        </div>
+      </div>
     </div>
-    <div class="demo-foot">
-      <span>A replay of a real run, slowed down to read. The agent runs on a scripted fake LLM, so no real AI is called.</span>
-      <button class="replay" type="button" data-replay>Play again</button>
+
+    <div class="wrap monitor reveal" data-monitor>
+      <div class="monitor-head">
+        <p class="monitor-status" aria-live="polite"><span class="led" aria-hidden="true"></span><span data-status>r0003 is live. Health checks pass.</span></p>
+        <button class="btn btn-small btn-break" type="button" data-break>Ship a bad version</button>
+      </div>
+      <div class="trace-box">
+        <svg class="trace" aria-hidden="true" data-trace><g class="flow"><path class="ok"/></g><path class="bad"/></svg>
+      </div>
+      <p class="trace-note">Press the button to break the release. This bit is a toy. The replay above is the real thing.</p>
     </div>
-  </div>
-  <p style="margin-top:16px">In the replay: a visitor hits a bug, the agent writes a fix and a test, a person approves it, and the guard deploys it. Then a broken version is rolled back on its own, and a rollback runs with the network blocked by macOS.</p>
+  </section>
 
-  <h2>Two parts that don't trust each other</h2>
-  <div class="split">
-    <div class="card">
-      <h3>The agent</h3>
-      <p>Uses the LLM to read errors, write a fix and a test, and hand the change over. It can't deploy anything, and it can't touch the live release, the config or the backups.</p>
+  <section class="facts" aria-label="What the tests show">
+    <div class="wrap">
+      <div class="facts-grid reveal">
+        <div class="fact"><strong>25</strong><span>kinds of broken release, all rolled back with no AI involved</span></div>
+        <div class="fact"><strong>0</strong><span>outside calls needed for a rollback. A test runs it with the network blocked.</span></div>
+        <div class="fact"><strong>1,459</strong><span>lines in the guard, all standard library and no LLM client</span></div>
+        <div class="fact"><strong>141</strong><span>tests, from killing the guard mid deploy to prompt injection</span></div>
+      </div>
     </div>
-    <div class="card guard">
-      <h3>The guard</h3>
-      <p>Plain fixed code, standard library only, no LLM client and no key. It checks the change, backs up, deploys, watches, and rolls back on its own. A rollback needs no network.</p>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">How it works</p>
+        <h2>An agent writes the fix. A guard decides if it lives.</h2>
+        <p>They run as separate processes. The agent can only hand over a change, and only the guard can deploy it.</p>
+      </div>
+      <div class="steps">
+        <article class="how-step">
+          <div class="step-copy reveal">
+            <span class="step-num">01</span>
+            <h3>It catches the error</h3>
+            <p>A visitor hits a bug and the app logs it. The agent reads that log, with secrets and personal details taken out first, then works on a copy of your code until it has a fix and a test that proves it.</p>
+            <p class="detail">Triggers: a new error, a daily round, or <code>livingcode run</code></p>
+          </div>
+          <figure class="shot reveal">
+            <div class="window"><div class="window-bar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">the bug, then the agent's proposal</span></div>
+              <img src="img/step-1.webp" width="1440" height="760" loading="lazy" decoding="async" alt="Terminal: a visitor request to /share returns 500, then livingcode run proposes 'Handle zero people in share' and it waits in the proposals list.">
+            </div>
+          </figure>
+        </article>
+
+        <article class="how-step">
+          <div class="step-copy reveal">
+            <span class="step-num">02</span>
+            <h3>You read the fix</h3>
+            <p>On <code>propose</code> mode nothing ships until you say so. You see the diff, the reason and the new test. Your approval is tied to that exact change, so an edited change needs a new yes.</p>
+            <p class="detail">Approve with <code>livingcode approve &lt;id&gt;</code></p>
+          </div>
+          <figure class="shot reveal">
+            <div class="window"><div class="window-bar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">livingcode show</span></div>
+              <img src="img/step-2.webp" width="1440" height="760" loading="lazy" decoding="async" alt="Terminal: the diff of the proposed fix in pricing.py, which returns zero when there are no people, plus a new test file for it.">
+            </div>
+          </figure>
+        </article>
+
+        <article class="how-step">
+          <div class="step-copy reveal">
+            <span class="step-num">03</span>
+            <h3>The guard ships it, or takes it back</h3>
+            <p>Backup, build, an atomic switch, then health and smoke checks through probation. If a check fails, the guard puts the last good release back by itself. It doesn't need the AI or the network to do that.</p>
+            <p class="detail">Roll back by hand any time with <code>livingcode rollback</code></p>
+          </div>
+          <figure class="shot reveal">
+            <div class="window"><div class="window-bar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">a good release, then a broken one</span></div>
+              <img src="img/step-3.webp" width="1440" height="760" loading="lazy" decoding="async" alt="Terminal: the approved fix settles as release r0003 and the bug now returns 200. A broken release then fails its smoke check on /checkout and is rolled back, and /checkout returns 200 again.">
+            </div>
+          </figure>
+        </article>
+      </div>
     </div>
-  </div>
-  <ol class="flow">
-    <li>An error shows up in the logs, or a daily or manual round starts.</li>
-    <li>The agent works on a copy of the code and hands over a candidate.</li>
-    <li>The guard runs fixed checks and the tests in a sandbox with no network.</li>
-    <li>On <code>propose</code> mode it waits for a person. On <code>auto</code> it goes on.</li>
-    <li>Backup, build, atomic switch, then health and smoke checks through a probation window.</li>
-    <li>It settles, or it rolls back and tells the agent what went wrong.</li>
-  </ol>
+  </section>
 
-  <h2>Quick install</h2>
-  <p>You need macOS and Python 3.11 or newer. There are no other dependencies.</p>
-<pre class="cmd">git clone https://github.com/abozaralizadeh/LivingCode.git
-cd LivingCode
-./setup_service.sh</pre>
-  <p>That installs the sample app, starts it and runs the doctor, which ends with a practice rollback. Run it again any time to update and restart. Then:</p>
-<pre class="cmd">PYTHONPATH=src python3 -m livingcode status
-python3 scripts/demo.py
-python3 -m unittest discover -s tests -t .</pre>
-  <p>The demo plays the whole story on a fresh temp lab. The tests take a few minutes, because many of them start and stop the sample app for real.</p>
+  <section class="quote">
+    <div class="wrap reveal">
+      <blockquote>
+        <p>The thing that makes the changes <em>isn't the thing that protects you</em> from them.</p>
+        <cite>From the original idea</cite>
+      </blockquote>
+      <svg class="divider" aria-hidden="true" data-divider><path/></svg>
+    </div>
+  </section>
 
-  <h2>Where it stands</h2>
-  <p>Today it only runs on the throwaway sample app that comes with it. A lab lock in the code refuses any other project, any other machine and any real LLM host.</p>
-  <table>
-    <thead><tr><th>Real thing</th><th>Used in the lab instead</th></tr></thead>
-    <tbody>
-      <tr><td>Claude and ChatGPT</td><td>A scripted fake LLM</td></tr>
-      <tr><td>PyPI, pip-audit, bandit</td><td>Local files and a small built-in scanner</td></tr>
-      <tr><td>git and a remote</td><td>Plain folders</td></tr>
-      <tr><td>systemd and its sandbox</td><td>A local process manager and macOS <code>sandbox-exec</code></td></tr>
-    </tbody>
-  </table>
-  <p style="margin-top:16px">Still to do before real use: the guard and agent as separate users on Linux, a first run of the Linux setup, a real LLM and a real project, and privacy and security reviews.</p>
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">Features</p>
+        <h2>Built around the moment a deploy goes wrong.</h2>
+      </div>
+      <div class="features-grid">
+        <article class="card reveal">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 29h9l3-6 4 11 3-8h15"/><path d="M32 12H14"/><path d="M18 7.5L13.5 12l4.5 4.5"/></svg>
+          <h3>A rollback with nothing to lean on</h3>
+          <p>The rollback is plain fixed code. It needs no network, no LLM, no key and no working app, and a test runs it with the network blocked by the operating system.</p>
+        </article>
+        <article class="card reveal">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 29a14 14 0 0 1 28 0"/><path d="M20 29l7-9"/><circle cx="20" cy="29" r="1.6" fill="currentColor"/><path d="M20 15v2.5M10.1 19.1l1.8 1.8M29.9 19.1l-1.8 1.8"/></svg>
+          <h3>Your key, your limits</h3>
+          <p>Bring a Claude or ChatGPT key. Hard caps per round and per month stop the spending, and every call is written down after redaction.</p>
+        </article>
+        <article class="card reveal">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="8" width="30" height="11" rx="5.5"/><circle cx="10.5" cy="13.5" r="2.6"/><rect x="5" y="23" width="30" height="11" rx="5.5"/><circle cx="29.5" cy="28.5" r="2.6" fill="currentColor"/></svg>
+          <h3>Propose first, auto later</h3>
+          <p>Each capability is off, propose or auto. Bug fixing starts on propose. Behaviour changes always wait for a person, even on auto.</p>
+        </article>
+        <article class="card reveal">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 5l14 7-14 7-14-7z"/><path d="M6 19.5l14 7 14-7"/><path d="M6 26.5l14 7 14-7"/></svg>
+          <h3>A backup before every deploy</h3>
+          <p>Code and config get backed up first, and the last five releases are kept. Data restore always stays in your hands.</p>
+        </article>
+        <article class="card reveal">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="17" width="24" height="17" rx="3"/><path d="M13 10.5a10 10 0 0 1 14 0"/><path d="M16.2 13.6a5.4 5.4 0 0 1 7.6 0"/><path d="M11 4l18 14"/></svg>
+          <h3>Tests in a sealed box</h3>
+          <p>A change's tests run in a sandbox with no network, no home folder and no secrets. New tests can be added, but existing ones can't be edited or deleted.</p>
+        </article>
+        <article class="card reveal">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11h9"/><rect x="18.5" y="8.5" width="15.5" height="5" rx="1.5" fill="currentColor"/><path d="M6 20h5"/><rect x="14.5" y="17.5" width="19.5" height="5" rx="1.5" fill="currentColor"/><path d="M6 29h13M23 29h11"/></svg>
+          <h3>Hostile logs, handled</h3>
+          <p>Log text is treated as data, not orders. Emails, keys, cards and tokens are removed before anything leaves the machine, and the agent has no shell.</p>
+        </article>
+      </div>
+    </div>
+  </section>
 
-  <h2>Licence</h2>
-  <div class="licence">
-    <p>Source available, free for non-commercial use (<a href="https://polyformproject.org/licenses/noncommercial/1.0.0">PolyForm Noncommercial 1.0.0</a>). You can use it, study it and change it for anything that isn't commercial.</p>
-    <p>Commercial use needs written permission. Ask for it by <a href="https://github.com/abozaralizadeh/LivingCode/issues">opening an issue</a>.</p>
-  </div>
+  <section class="section" id="install">
+    <div class="wrap install-grid">
+      <div class="install-notes reveal">
+        <p class="kicker">Install</p>
+        <h2>Try it on your Mac.</h2>
+        <p>You need macOS and Python 3.11 or newer. There's nothing else to install.</p>
+        <ul>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>The setup installs a throwaway sample shop, starts it and runs a practice rollback.</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>The lab uses a scripted fake LLM, so nothing is paid for and no key is needed.</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Run the setup again any time to update and restart everything.</li>
+        </ul>
+      </div>
+      <div class="code-list reveal">
+        <div>
+          <p class="code-label">Get it and set up the lab</p>
+          <div class="code"><pre><code data-copy-text="git clone https://github.com/abozaralizadeh/LivingCode.git&#10;cd LivingCode&#10;./setup_service.sh"><span class="p">$ </span>git clone https://github.com/abozaralizadeh/LivingCode.git
+<span class="p">$ </span>cd LivingCode
+<span class="p">$ </span>./setup_service.sh</code></pre><button class="copy" type="button" data-copy>Copy</button></div>
+        </div>
+        <div>
+          <p class="code-label">Play the whole story on a fresh lab</p>
+          <div class="code"><pre><code data-copy-text="python3 scripts/demo.py"><span class="p">$ </span>python3 scripts/demo.py</code></pre><button class="copy" type="button" data-copy>Copy</button></div>
+        </div>
+        <div>
+          <p class="code-label">Run the tests (a few minutes, they start real processes)</p>
+          <div class="code"><pre><code data-copy-text="python3 -m unittest discover -s tests -t ."><span class="p">$ </span>python3 -m unittest discover -s tests -t .</code></pre><button class="copy" type="button" data-copy>Copy</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <footer>
-    LivingCode is a working name. Copyright (c) 2026 Abozar Alizadeh. <a href="https://github.com/abozaralizadeh/LivingCode">Code and docs on GitHub.</a>
-  </footer>
+  <section class="section" id="faq">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">FAQ and limits</p>
+        <h2>What it can't do yet.</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details>
+          <summary>Can I point it at my own project?</summary>
+          <p>Not yet. A lab lock in the code refuses anything except the sample app on macOS. The guard and the agent still have to run as separate users on Linux, and that split, the main protection in the design, hasn't been tested.</p>
+        </details>
+        <details>
+          <summary>Does the AI ever deploy anything?</summary>
+          <p>No. The agent can only hand over a candidate change. Only the guard deploys, and the guard has no LLM client, no key and no code that waits on the agent.</p>
+        </details>
+        <details>
+          <summary>What if a bad change passes every check?</summary>
+          <p>It can happen. That's why there's a probation window, one agent deploy a day by default, a circuit breaker after three rollbacks in a row, and a manual rollback to any of the last five releases.</p>
+        </details>
+        <details>
+          <summary>Which LLMs does it work with?</summary>
+          <p>Adapters for Claude and ChatGPT are written, but so far they've only been tested against a local fake server. Nobody knows yet how a real model does with the agent's prompt. The lab runs on a scripted fake.</p>
+        </details>
+        <details>
+          <summary>Is it open source?</summary>
+          <p>It's source available. You can use it, study it and change it for anything non-commercial, under PolyForm Noncommercial 1.0.0. For commercial use, open an issue and ask.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <div class="closing-box reveal">
+        <h2>Watch a broken release come back on its own.</h2>
+        <p>Clone it, run the demo, and read the guard. It's short enough to read in an afternoon.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://github.com/abozaralizadeh/LivingCode">View on GitHub</a>
+          <a class="btn btn-ghost" href="#install">Install</a>
+        </div>
+        <svg class="closing-trace" aria-hidden="true" data-divider><path/></svg>
+      </div>
+    </div>
+  </section>
 </main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-links">
+      <a href="https://github.com/abozaralizadeh/LivingCode">GitHub repo</a>
+      <a href="https://github.com/abozaralizadeh/LivingCode/blob/main/LICENSE">Source available, PolyForm Noncommercial 1.0.0</a>
+      <a href="https://github.com/abozaralizadeh/LivingCode/issues">Ask about commercial use</a>
+    </div>
+    <p class="made">Made by <a href="https://abozaralizadeh.github.io">Abozar Alizadeh</a>. LivingCode is a working name.</p>
+  </div>
+</footer>
+
 <script src="demo-cast.js"></script>
 <script src="player.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

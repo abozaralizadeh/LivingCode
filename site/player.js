@@ -113,6 +113,14 @@
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       player.seek(player.plan.length);
+    } else if ("IntersectionObserver" in window) {
+      // Start the replay only once it's on screen.
+      var watch = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        watch.disconnect();
+        player.play();
+      }, { threshold: 0.3 });
+      watch.observe(box);
     } else {
       player.play();
     }
