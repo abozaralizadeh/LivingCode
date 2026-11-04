@@ -393,6 +393,15 @@ class WholeRunBehindAPrefix(unittest.TestCase):
         self.assertNotRegex(script, r"""(fetch|EventSource)\(\s*["']/""")
         self.assertEqual(self.call("GET", PREFIX + "static/../front.py")[0], 404)
 
+    def test_the_hidden_attribute_always_hides(self):
+        static = ROOT / "src/livingcode/webdemo/static"
+        page = (static / "index.html").read_text()
+        styles = (static / "styles.css").read_text()
+        self.assertGreaterEqual(len(re.findall(r"\shidden(?=[\s>])", page)), 2)
+        # A class that sets display, like .note, beats the browser's own [hidden] rule,
+        # so the fake AI note showed even with Azure on. The page needs its own rule.
+        self.assertRegex(styles, r"\[hidden\]\s*\{\s*display:\s*none\s*!important;?\s*\}")
+
     def test_bad_requests_are_turned_away(self):
         self.assertEqual(self.call("POST", PREFIX + "api/run", "scenario=zero-people",
                                    {"Content-Type": "application/x-www-form-urlencoded"})[0], 415)

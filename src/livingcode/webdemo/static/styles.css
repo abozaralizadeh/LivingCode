@@ -50,6 +50,8 @@
 }
 
 * { box-sizing: border-box; }
+/* The hidden attribute always wins, even over a class that sets display. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background-color: var(--bg); color: var(--text);

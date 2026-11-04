@@ -73,6 +73,8 @@ PYTHONPATH=src python3 -m livingcode.webdemo.front
 
 Then open http://127.0.0.1:8606/. Without a key it runs on the scripted fake AI. How it's locked down and how to host it on a shared Linux VM behind nginx are in [docs/WEB-DEMO.md](docs/WEB-DEMO.md).
 
+On the VM, each run's `livingcode doctor` prints a WARN that the separate guard and agent users aren't in place. That's expected there. Both units run as the folder's owner, so the demo shows the whole flow but not the two user split, which still needs a real Linux install (D23).
+
 ## Run the tests
 
 ```bash

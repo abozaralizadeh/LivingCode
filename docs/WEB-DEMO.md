@@ -113,6 +113,8 @@ journalctl -u 'idea-livingcode-runner@*' -f
 
 There's also a size limited copy in `data/logs/livingcode-web.log` (5 MB, plus two older files), easy to copy off the VM.
 
+Each run's `livingcode doctor` prints `WARN separate guard and agent users aren't in place`. That's expected in this mode: both units run as the folder's owner, so inside a run the guard and the agent are one user (D23).
+
 To see the five files without touching anything, render them into a folder:
 
 ```bash
